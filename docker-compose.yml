@@ -1,0 +1,36 @@
+# docker-compose.yml
+version: "3.7"
+
+networks:
+  lgtm:
+
+services:
+  # 1. Grafana: The Visualization Layer
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - lgtm
+    # Volume to save configurations across restarts
+    volumes:
+      - ./grafana-data:/var/lib/grafana
+    environment:
+      # Default user/pass is admin/admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+    depends_on:
+      - loki
+
+  # 2. Loki: The Log Aggregator
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    ports:
+      - "3100:3100" # For receiving logs from Promtail/applications
+    networks:
+      - lgtm
+    command: -config.file=/etc/loki/config.yaml
+
+# You would also need to create a simple loki/config.yaml and add Promtail to send logs.
+# We will cover adding Tempo, Mimir, and Promtail/OTel Collector in the next steps.
