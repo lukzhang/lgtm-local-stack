@@ -1,0 +1,35 @@
+receivers:
+  # Accepts traces, metrics, and logs over OTLP from your application
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+exporters:
+  # Sends traces to Tempo
+  otlp/tempo:
+    endpoint: tempo:4317 # Tempo's OTLP port inside the Docker network
+    tls:
+      insecure: true
+
+  # Sends metrics to Mimir
+  prometheusremotewrite/mimir:
+    endpoint: http://mimir:9009/api/v1/push
+
+  # Sends logs to Loki
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+    encoding:
+      timestamp: "RFC3339Nano"
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [otlp/tempo]
+    metrics:
+      receivers: [otlp]
+      exporters: [prometheusremotewrite/mimir]
+    logs:
+      receivers: [otlp]
+      exporters: [loki]

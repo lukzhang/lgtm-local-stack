@@ -1,0 +1,25 @@
+# This file automatically provisions the data sources in Grafana
+apiVersion: 1
+
+datasources:
+  - name: Loki
+    type: loki
+    url: http://loki:3100
+    access: proxy
+    isDefault: true
+
+  - name: Tempo
+    type: tempo
+    url: http://tempo:3200
+    access: proxy
+    isDefault: false
+    # Enables Trace-to-Logs for correlation
+    jsonData:
+      lokiSearch:
+        datasourceUid: 'loki'
+
+  - name: Mimir
+    type: prometheus
+    url: http://mimir:9009
+    access: proxy
+    isDefault: false
